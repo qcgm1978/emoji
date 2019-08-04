@@ -16,18 +16,25 @@
  * =============================================================================
  */
 
-import 'babel-polyfill';
-import * as Stats from 'stats.js';
-import {MobileNet} from './mobilenet';
-import {camera, VIDEO_PIXELS} from './camera';
-import {VIEWS, ui, GAME_STRINGS} from './ui';
-import {share} from './share';
-import {getQueryParam, isIOS} from './utils';
-import {shuffle} from 'lodash';
-import * as tfc from '@tensorflow/tfjs-core';
-import {SPEECH_SPRITE_TIMESTAMPS} from './speech_sprite_timestamps';
-import {EmojiItem, EMOJIS_LVL_1, EMOJIS_LVL_2, EMOJIS_LVL_3, EMOJIS_LVL_4,
-     EMOJIS_LVL_5, EMOJIS_LVL_DEMO} from './game_levels';
+import "babel-polyfill";
+import * as Stats from "stats.js";
+import { MobileNet } from "./mobilenet";
+import { camera, VIDEO_PIXELS } from "./camera";
+import { VIEWS, ui, GAME_STRINGS } from "./ui";
+import { share } from "./share";
+import { getQueryParam, isIOS } from "./utils";
+import { shuffle } from "lodash";
+import * as tfc from "@tensorflow/tfjs-core";
+import { SPEECH_SPRITE_TIMESTAMPS } from "./speech_sprite_timestamps";
+import {
+  EmojiItem,
+  EMOJIS_LVL_1,
+  EMOJIS_LVL_2,
+  EMOJIS_LVL_3,
+  EMOJIS_LVL_4,
+  EMOJIS_LVL_5,
+  EMOJIS_LVL_DEMO
+} from "./game_levels";
 
 export const GAME_START_TIME = 20;
 export const GAME_EXTEND_TIME = 10;
@@ -48,14 +55,14 @@ export interface Sleuths {
 }
 
 export interface SleuthVoices {
-  [index: string]: SpeechSynthesisVoice|null;
+  [index: string]: SpeechSynthesisVoice | null;
 }
 
 const SLEUTHS: Array<Sleuths> = [
   {
-    'nonGoogleVoice': 'Samantha',
-    'googleVoice': 'Google US English',
-    'emoji': '/img/emojis/ui/sleuth.svg',
+    nonGoogleVoice: "Samantha",
+    googleVoice: "Google US English",
+    emoji: "/img/emojis/ui/sleuth.svg"
   }
 ];
 
@@ -64,15 +71,15 @@ export interface AudioSources {
 }
 
 export const AUDIO = {
-  GAME_LOOP: 'gameloop',
-  TIME_RUNNING_LOW: 'timerunningout',
-  COUNTDOWN: 'countdown',
-  FAIL: 'fail',
-  FOUND_IT: 'foundit',
-  WIN: 'win',
-  END: 'endofgame',
-  TIMER_INCREASE: 'timerincrease',
-  IOS_SPEECH_SPRITE: 'iosspeechsprite'
+  GAME_LOOP: "gameloop",
+  TIME_RUNNING_LOW: "timerunningout",
+  COUNTDOWN: "countdown",
+  FAIL: "fail",
+  FOUND_IT: "foundit",
+  WIN: "win",
+  END: "endofgame",
+  TIMER_INCREASE: "timerincrease",
+  IOS_SPEECH_SPRITE: "iosspeechsprite"
 };
 
 /** Manages game state and various tasks related to game events. */
@@ -140,9 +147,9 @@ export class Game {
     this.topItemGuess = null;
     this.sleuth = shuffle(SLEUTHS)[0];
     this.sleuthVoice = {
-      'nonGoogleVoice': null,
-      'googleVoice': null,
-      'activeVoice': null
+      nonGoogleVoice: null,
+      googleVoice: null,
+      activeVoice: null
     };
 
     this.emojiLvl1 = shuffle(EMOJIS_LVL_1);
@@ -153,39 +160,40 @@ export class Game {
     this.emojiLvlDemo = Array.from(EMOJIS_LVL_DEMO);
 
     this.emojiLvlLookup = {
-      '1': this.emojiLvl1,
-      '2': this.emojiLvl2,
-      '3': this.emojiLvl3,
-      '4': this.emojiLvl4,
-      '5': this.emojiLvl5,
-      '#': this.emojiLvlDemo
+      "1": this.emojiLvl1,
+      "2": this.emojiLvl2,
+      "3": this.emojiLvl3,
+      "4": this.emojiLvl4,
+      "5": this.emojiLvl5,
+      "#": this.emojiLvlDemo
     };
 
-    this.gameDifficulty = '1121222345';
+    this.gameDifficulty = "1121222345";
     this.currentLvlIndex = 0;
 
     this.audioSources = {
-      [AUDIO.GAME_LOOP]: new Audio('/audio/game-loop.mp4'),
-      [AUDIO.TIME_RUNNING_LOW]: new Audio('/audio/time-running-out.mp4'),
-      [AUDIO.COUNTDOWN]: new Audio('/audio/countdown.mp4'),
-      [AUDIO.FAIL]: new Audio('/audio/fail.mp4'),
-      [AUDIO.FOUND_IT]: new Audio('/audio/foundit.mp4'),
-      [AUDIO.WIN]: new Audio('/audio/win.mp4'),
-      [AUDIO.END]: new Audio('/audio/end-of-game.mp4'),
-      [AUDIO.TIMER_INCREASE]: new Audio('/audio/timer-increase.mp4')
+      [AUDIO.GAME_LOOP]: new Audio("/audio/game-loop.mp4"),
+      [AUDIO.TIME_RUNNING_LOW]: new Audio("/audio/time-running-out.mp4"),
+      [AUDIO.COUNTDOWN]: new Audio("/audio/countdown.mp4"),
+      [AUDIO.FAIL]: new Audio("/audio/fail.mp4"),
+      [AUDIO.FOUND_IT]: new Audio("/audio/foundit.mp4"),
+      [AUDIO.WIN]: new Audio("/audio/win.mp4"),
+      [AUDIO.END]: new Audio("/audio/end-of-game.mp4"),
+      [AUDIO.TIMER_INCREASE]: new Audio("/audio/timer-increase.mp4")
     };
 
     if (isIOS()) {
-      this.audioSources[AUDIO.IOS_SPEECH_SPRITE] =
-          new Audio('/audio/ios-speech-sprite.m4a');
+      this.audioSources[AUDIO.IOS_SPEECH_SPRITE] = new Audio(
+        "/audio/ios-speech-sprite.m4a"
+      );
     }
 
-    if (getQueryParam('demo') === 'true') {
+    if (getQueryParam("demo") === "true") {
       this.setupDemoMode();
       this.demoMode = true;
     }
 
-    if (getQueryParam('debug') === 'true') {
+    if (getQueryParam("debug") === "true") {
       this.debugMode = true;
     }
 
@@ -196,19 +204,19 @@ export class Game {
       this.setupSpeakVoice();
 
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged =
-            this.setupSpeakVoice.bind(this);
+        window.speechSynthesis.onvoiceschanged = this.setupSpeakVoice.bind(
+          this
+        );
       }
     }
 
     share.initShareElements();
-
   }
 
   setupDemoMode() {
     // Sets the game emojis to use the demo emojis from EMOJIS_LVL_DEMO.
     // This set is also not shuffled and always appear in the same order.
-    this.gameDifficulty = '#';
+    this.gameDifficulty = "#";
   }
 
   /**
@@ -219,18 +227,18 @@ export class Game {
   setupSpeakVoice() {
     window.speechSynthesis.getVoices().filter(voice => {
       if (voice.name === this.sleuth.nonGoogleVoice) {
-        this.sleuthVoice['nonGoogleVoice'] = voice;
+        this.sleuthVoice["nonGoogleVoice"] = voice;
       }
 
       if (voice.name === this.sleuth.googleVoice) {
-        this.sleuthVoice['googleVoice'] = voice;
+        this.sleuthVoice["googleVoice"] = voice;
       }
     });
 
-    if (this.sleuthVoice['googleVoice']) {
-      this.sleuthVoice['activeVoice'] = this.sleuthVoice['googleVoice'];
+    if (this.sleuthVoice["googleVoice"]) {
+      this.sleuthVoice["activeVoice"] = this.sleuthVoice["googleVoice"];
     } else {
-      this.sleuthVoice['activeVoice'] = this.sleuthVoice['nonGoogleVoice'];
+      this.sleuthVoice["activeVoice"] = this.sleuthVoice["nonGoogleVoice"];
     }
   }
 
@@ -247,13 +255,14 @@ export class Game {
       this.audioSources[item].muted = true;
       let playPromise = this.audioSources[item].play();
       if (playPromise !== undefined) {
-        playPromise.then(() => {
-          this.audioSources[item].pause();
-          this.audioSources[item].muted = false;
-        })
-        .catch(error => {
-          console.log('Error with play promise');
-        });
+        playPromise
+          .then(() => {
+            this.audioSources[item].pause();
+            this.audioSources[item].muted = false;
+          })
+          .catch(error => {
+            console.log("Error with play promise");
+          });
       }
     }
   }
@@ -272,8 +281,12 @@ export class Game {
    * @param audio The audio file to play.
    * @param loop Indicates if the audio file should loop.
    */
-  playAudio(audio: string, loop = false, startTime = 0,
-      endTime:number = undefined) {
+  playAudio(
+    audio: string,
+    loop = false,
+    startTime = 0,
+    endTime: number = undefined
+  ) {
     let audioElement = this.audioSources[audio];
     if (loop) {
       audioElement.loop = true;
@@ -286,16 +299,16 @@ export class Game {
         const timeUpdate = (e: Event) => {
           if (audioElement.currentTime >= endTime) {
             audioElement.pause();
-            audioElement.removeEventListener('timeupdate', timeUpdate);
+            audioElement.removeEventListener("timeupdate", timeUpdate);
           }
         };
 
-        audioElement.addEventListener('timeupdate', timeUpdate);
+        audioElement.addEventListener("timeupdate", timeUpdate);
       }
 
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.log('Error in playAudio: ' + error);
+          console.log("Error in playAudio: " + error);
         });
       }
     }
@@ -326,9 +339,12 @@ export class Game {
    */
   spriteSpeak(key: string) {
     if (SPEECH_SPRITE_TIMESTAMPS.hasOwnProperty(key)) {
-      this.playAudio(AUDIO.IOS_SPEECH_SPRITE,
-          false, SPEECH_SPRITE_TIMESTAMPS[key][0],
-          SPEECH_SPRITE_TIMESTAMPS[key][1] + .25);
+      this.playAudio(
+        AUDIO.IOS_SPEECH_SPRITE,
+        false,
+        SPEECH_SPRITE_TIMESTAMPS[key][0],
+        SPEECH_SPRITE_TIMESTAMPS[key][1] + 0.25
+      );
     }
   }
 
@@ -339,7 +355,8 @@ export class Game {
    */
   warmUpModel() {
     this.emojiScavengerMobileNet.predict(
-        tfc.zeros([VIDEO_PIXELS, VIDEO_PIXELS, 3]));
+      tfc.zeros([VIDEO_PIXELS, VIDEO_PIXELS, 3])
+    );
   }
 
   /**
@@ -348,19 +365,16 @@ export class Game {
    * @async
    */
   async predict() {
-
     // Only do predictions if the game is running, ensures performant view
     // transitions and saves battery life when the game isn't in running mode.
     if (this.isRunning) {
-
-      if(this.debugMode) {
+      if (this.debugMode) {
         this.stats.begin();
       }
 
       // Run the tensorflow predict logic inside a tfc.tidy call which helps
       // to clean up memory from tensorflow calls once they are done.
       const result = tfc.tidy(() => {
-
         // For UX reasons we spread the video element to 100% of the screen
         // but our traning data is trained against 244px images. Before we
         // send image data from the camera to the predict engine we slice a
@@ -368,20 +382,23 @@ export class Game {
         // better matching against our model.
         const pixels = tfc.fromPixels(camera.videoElement);
         const centerHeight = pixels.shape[0] / 2;
-        const beginHeight = centerHeight - (VIDEO_PIXELS / 2);
+        const beginHeight = centerHeight - VIDEO_PIXELS / 2;
         const centerWidth = pixels.shape[1] / 2;
-        const beginWidth = centerWidth - (VIDEO_PIXELS / 2);
-        const pixelsCropped =
-              pixels.slice([beginHeight, beginWidth, 0],
-                           [VIDEO_PIXELS, VIDEO_PIXELS, 3]);
+        const beginWidth = centerWidth - VIDEO_PIXELS / 2;
+        const pixelsCropped = pixels.slice(
+          [beginHeight, beginWidth, 0],
+          [VIDEO_PIXELS, VIDEO_PIXELS, 3]
+        );
 
         return this.emojiScavengerMobileNet.predict(pixelsCropped);
       });
 
       // This call retrieves the topK matches from our MobileNet for the
       // provided image data.
-      const topK =
-          await this.emojiScavengerMobileNet.getTopKClasses(result, 10);
+      const topK = await this.emojiScavengerMobileNet.getTopKClasses(
+        result,
+        10
+      );
 
       // Match the top 2 matches against our current active emoji.
       this.checkEmojiMatch(topK[0].label, topK[1].label);
@@ -389,17 +406,18 @@ export class Game {
       // if ?debug=true is passed in as a query param show the topK classes
       // on screen to help with debugging.
       if (this.debugMode) {
-        ui.predictionResultsEl.style.display = 'block';
-        ui.predictionResultsEl.innerText = '';
+        ui.predictionResultsEl.style.display = "block";
+        ui.predictionResultsEl.innerText = "";
 
         for (const item of topK) {
-          ui.predictionResultsEl.innerText +=
-                `${item.value.toFixed(5)}: ${item.label}\n`;
+          ui.predictionResultsEl.innerText += `${item.value.toFixed(5)}: ${
+            item.label
+          }\n`;
         }
       }
     }
 
-    if(this.debugMode) {
+    if (this.debugMode) {
       this.stats.end();
     }
 
@@ -414,10 +432,9 @@ export class Game {
    */
   initGame() {
     if (this.firstRun) {
-
-      if(this.debugMode) {
+      if (this.debugMode) {
         this.stats = new Stats();
-        this.stats.dom.style.position = 'relative';
+        this.stats.dom.style.position = "relative";
         this.stats.showPanel(0);
         ui.cameraFPSEl.appendChild(this.stats.dom);
       }
@@ -427,38 +444,40 @@ export class Game {
         this.emojiScavengerMobileNet.load().then(() => this.warmUpModel()),
         camera.setupCamera().then((value: CameraDimentions) => {
           camera.setupVideoDimensions(value[0], value[1]);
-        }),
-      ]).then(values => {
-        // Both the MobileNet and the camera has been loaded.
-        // We can start the game by starting the predict engine and showing the
-        // game countdown.
-        // NOTE the predict engine will only do calculations if game.isRunning
-        // is set to true. We trigger that inside our countdown Promise.
-        this.firstRun = false;
-        this.nextEmoji();
-        this.predict();
-        ui.showCountdown();
-      }).catch(error => {
-        ui.startGameBtn.style.display = 'none';
-        ui.ageDisclaimerMsgEl.style.display = 'none';
-        ui.hideView(VIEWS.LOADING);
+        })
+      ])
+        .then(values => {
+          // Both the MobileNet and the camera has been loaded.
+          // We can start the game by starting the predict engine and showing the
+          // game countdown.
+          // NOTE the predict engine will only do calculations if game.isRunning
+          // is set to true. We trigger that inside our countdown Promise.
+          this.firstRun = false;
+          this.nextEmoji();
+          this.predict();
+          ui.showCountdown();
+        })
+        .catch(error => {
+          ui.startGameBtn.style.display = "none";
+          ui.ageDisclaimerMsgEl.style.display = "none";
+          ui.hideView(VIEWS.LOADING);
 
-        // iOS does not provide access to mediaDevices.getUserMedia via
-        // UiWebviews in iOS 11.2 - This causes a TypeError to be returned
-        // which we handle to display a relevant message to encourage the user
-        // to open the game in the standard Safari app.
-        if (error.name === 'TypeError' && isIOS()) {
-          ui.setLandingInfoMsg(GAME_STRINGS.SAFARI_WEBVIEW);
-        } else if (error.name === 'NotAllowedError') {
-          // Users that explicitly deny camera access get a message that
-          // encourages them to enable camera access.
-          ui.setLandingInfoMsg(GAME_STRINGS.CAMERA_NO_ACCESS);
-        } else {
-          // General error message for issues getting camera access via
-          // mediaDevices.getUserMedia.
-          ui.setLandingInfoMsg(GAME_STRINGS.CAMERA_GENERAL_ERROR);
-        }
-      });
+          // iOS does not provide access to mediaDevices.getUserMedia via
+          // UiWebviews in iOS 11.2 - This causes a TypeError to be returned
+          // which we handle to display a relevant message to encourage the user
+          // to open the game in the standard Safari app.
+          if (error.name === "TypeError" && isIOS()) {
+            ui.setLandingInfoMsg(GAME_STRINGS.SAFARI_WEBVIEW);
+          } else if (error.name === "NotAllowedError") {
+            // Users that explicitly deny camera access get a message that
+            // encourages them to enable camera access.
+            ui.setLandingInfoMsg(GAME_STRINGS.CAMERA_NO_ACCESS);
+          } else {
+            // General error message for issues getting camera access via
+            // mediaDevices.getUserMedia.
+            ui.setLandingInfoMsg(GAME_STRINGS.CAMERA_GENERAL_ERROR);
+          }
+        });
     } else {
       ui.showCountdown();
     }
@@ -503,14 +522,13 @@ export class Game {
    * Resets all game variables and UI so we can start a new game instance.
    */
   resetGame() {
-
     ui.resetScrollPositions();
 
     this.resetAudioSources();
 
     this.currentLvlIndex = 0;
     if (this.demoMode) {
-      this.reShuffleLevelEmojis('#');
+      this.reShuffleLevelEmojis("#");
     }
     this.nextEmoji();
 
@@ -562,9 +580,9 @@ export class Game {
    */
   speak(msg: string) {
     if (this.topItemGuess) {
-      if ('speechSynthesis' in window) {
+      if ("speechSynthesis" in window) {
         let msgSpeak = new SpeechSynthesisUtterance();
-        msgSpeak.voice = this.sleuthVoice['activeVoice'];
+        msgSpeak.voice = this.sleuthVoice["activeVoice"];
         msgSpeak.text = msg;
 
         speechSynthesis.speak(msgSpeak);
@@ -577,22 +595,20 @@ export class Game {
    * (currently every second)
    */
   handleGameTimerCountdown() {
-
     if (this.timer === 0) {
       this.pauseAudio(AUDIO.GAME_LOOP);
       this.pauseAudio(AUDIO.TIME_RUNNING_LOW);
       window.clearInterval(this.timerInterval);
       window.clearInterval(this.speakInterval);
 
-      (<any>window).gtag('event', 'Failure', {
-        'event_category': 'Emoji',
-        'event_label': `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`
+      (<any>window).gtag("event", "Failure", {
+        event_category: "Emoji",
+        event_label: `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`
       });
 
       if (this.score === 0) {
         ui.showNoItemsFoundView();
-      }
-      else {
+      } else {
         ui.showXItemsFoundView(this.endGamePhotos);
       }
     } else if (this.timer <= 5) {
@@ -615,7 +631,6 @@ export class Game {
    * @param emojiNameTop2 Second place guess emoji name.
    */
   checkEmojiMatch(emojiNameTop1: string, emojiNameTop2: string) {
-
     // If our top guess is different from when we last checked update the
     // top guess.
     if (this.topItemGuess !== emojiNameTop1) {
@@ -632,8 +647,10 @@ export class Game {
       }
     }
 
-    if (this.currentEmoji.name === emojiNameTop1 ||
-        this.currentEmoji.name === emojiNameTop2)  {
+    if (
+      this.currentEmoji.name === emojiNameTop1 ||
+      this.currentEmoji.name === emojiNameTop2
+    ) {
       this.emojiFound();
     }
   }
@@ -644,7 +661,6 @@ export class Game {
    * progressed in the game.
    */
   nextEmoji() {
-
     if (this.currentLvlIndex === this.gameDifficulty.length) {
       this.currentLvlIndex = 0;
     }
@@ -667,9 +683,9 @@ export class Game {
 
     ui.setActiveEmoji(this.currentEmoji.path);
 
-    (<any>window).gtag('event', 'Find', {
-      'event_category': 'Emoji',
-      'event_label': `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`
+    (<any>window).gtag("event", "Find", {
+      event_category: "Emoji",
+      event_label: `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`
     });
   }
 
@@ -683,29 +699,33 @@ export class Game {
    */
   reShuffleLevelEmojis(level: string) {
     switch (level) {
-      case '1':
+      case "1":
         this.emojiLvlLookup[level] = shuffle(EMOJIS_LVL_1);
         break;
-      case '2':
+      case "2":
         this.emojiLvlLookup[level] = shuffle(EMOJIS_LVL_2);
         break;
-      case '3':
+      case "3":
         this.emojiLvlLookup[level] = shuffle(EMOJIS_LVL_3);
         break;
-      case '4':
+      case "4":
         this.emojiLvlLookup[level] = shuffle(EMOJIS_LVL_4);
         break;
-      case '5':
+      case "5":
         this.emojiLvlLookup[level] = shuffle(EMOJIS_LVL_5);
         break;
-      case '#':
+      case "#":
         // NOTE: the Demo list is not shuffled since we always request them in
         // same order for demo purposes.
         this.emojiLvlLookup[level] = Array.from(EMOJIS_LVL_DEMO);
         break;
       default:
-        throw new Error('Error: expected ' + level + ' level string in the ' +
-            'level EmojiLevelsLookup');
+        throw new Error(
+          "Error: expected " +
+            level +
+            " level string in the " +
+            "level EmojiLevelsLookup"
+        );
     }
   }
 
@@ -724,10 +744,10 @@ export class Game {
     ui.cameraFlash();
 
     let timeToFind = this.timerAtStartOfRound - this.timer;
-    (<any>window).gtag('event', 'Success', {
-      'event_category': 'Emoji',
-      'event_label': `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`,
-      'value': timeToFind
+    (<any>window).gtag("event", "Success", {
+      event_category: "Emoji",
+      event_label: `${this.currentEmoji.emoji} - ${this.currentEmoji.name}`,
+      value: timeToFind
     });
 
     if (GAME_MAX_ITEMS === this.score) {

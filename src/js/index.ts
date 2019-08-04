@@ -16,8 +16,8 @@
  * =============================================================================
  */
 
-import {ui} from './ui';
-
+import { ui } from "./ui";
+// alert(2);
 /**
  * Ensures no media stream tracks are active and initializes our UI.
  *

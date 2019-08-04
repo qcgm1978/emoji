@@ -6,3 +6,5 @@ cors-settings.json
 *.DS_Store
 *.swp
 *.map
+.cache/
+dist/
